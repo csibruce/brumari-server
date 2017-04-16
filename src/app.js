@@ -42,7 +42,7 @@ app.use('/', express.static('public'));
 app.use('/auth', auth, express.static('public'));
 
 app.post('/upload', Multer.single('upload'), function(req, res){
-  // console.log(req.file);
+  // console.log(req.file);;;
   const { originalname, mimetype, buffer } = req.file
   s3.upload(getParamsForS3Upload(originalname, buffer, mimetype), function(err, data){
     if (data) {

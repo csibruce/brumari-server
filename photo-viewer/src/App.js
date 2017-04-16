@@ -53,9 +53,10 @@ class App extends Component {
         const result = (res.text) ? getJson(res.text) : null;
         const photos = result && result.Contents
         console.log({ photos });
-        this.photoSize = photos.length;
+        this.photoSize = photos.length || 0;
         this.photoCounter = 0;
 
+        if (!photos[this.photoCounter]) return;
         this.setter = setInterval(() => {
           this.addPhoto(photos[this.photoCounter]);
           this.photoCounter = this.photoCounter + 1;
@@ -89,7 +90,7 @@ class App extends Component {
                 src={`https://s3.ap-northeast-2.amazonaws.com/brumari/${photo.Key}`}
                 width="200px"
                 height="200px"
-                />
+              />
             )
           })}
         </div>

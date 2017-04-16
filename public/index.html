@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>사진 업로드</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.5.2/superagent.min.js"></script>
+    <script>
+      var tagId = 0
+
+
+      function onClick() {
+        //input file에서 file가져오기
+        //post요청하기
+        //로딩화면출력
+        //완료메시지 다시업로드
+        var image = document.getElementById('preview-image')
+        var files = document.getElementById('upload-file').files;
+        var formData = new FormData();
+        if (files.length < 1) return alert('업로드할 파일을 선택해주세요.')
+
+        formData.append('upload', files[0]);
+        console.log(files[0]);
+        console.log('done!');
+
+        superagent
+           .post('/upload')
+           .send(formData)
+           .set('Accept', 'application/json')
+           .end(function(err, res){
+             console.log('===================');
+             console.log(res);
+             var result = JSON.parse(res.text)
+             image.setAttribute('src', result.Location)
+           });
+      }
+
+      function removeNode(id) {
+        var element = document.getElementById('tags');
+        var elemForRemove = document.getElementById(id);
+
+        element.removeChild(elemForRemove);
+      }
+
+      function makeTagNode(text) {
+        var div = document.createElement("div");
+        var textnode = document.createTextNode(`#${text}`);
+        div.appendChild(textnode);
+        div.setAttribute('id', tagId);
+        div.setAttribute('class', 'tag');
+        div.addEventListener("click", function(e){
+          var id = e.target.id
+          removeNode(e.target.id);
+        }, false);
+        tagId++
+        return div
+      }
+
+      function addTag() {
+        var tagElem = document.getElementById('tags');
+        var tag = document.getElementById('tag');
+
+
+        if (!tag.value) return alert('태그를 입력해주세요');
+        tagElem.appendChild(makeTagNode(tag.value));
+        tag.value = '';
+        tag.focus();
+      }
+    </script>
+    <style media="screen">
+    .filebox label {
+      display: inline-block;
+      padding: .5em .75em;
+      color: #fafafa;
+      font-size: inherit;
+      line-height: normal;
+      vertical-align: middle;
+      background-color: #008c0c;
+      cursor: pointer;
+      border: 1px solid #ebebeb;
+      border-bottom-color: #e2e2e2;
+      border-radius: .25em;
+    }
+    .filebox input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip:rect(0,0,0,0);
+      border: 0;
+    }
+    </style>
+  </head>
+  <body>
+    <form>
+      <div class="filebox">
+        <label for="upload-file">업로드</label>
+        <input type="file" id="upload-file" name="file" accept="image/*">
+      </div>
+      <div class="preview-box">
+        <img id="preview-image">
+      </div>
+      <div id="tags"></div>
+      <input id="tag" type="text" name="tag" value="">
+      <button type="button" onclick="addTag()">tag 추가</button><br />
+      <button id="upload-button" type="button" onclick="onClick()">업로드</button>
+    </form>
+  </body>
+</html>

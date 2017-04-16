@@ -1,4 +1,4 @@
-export const AWS_KEY = {
+exports.AWS_KEY = {
   accessKeyId: '',
   secretAccessKey: '',
   region: '',

@@ -11,6 +11,8 @@ const io = require('socket.io')(http)
 
 const { AWS_KEY } = require('../config/keys')
 
+console.log({ AWS_KEY });
+
 io.on('connection', function(socket){
   console.log('a user connected');
 

@@ -4,17 +4,14 @@ const AWS = require('aws-sdk');
 const multer = require('multer');
 const fs = require('fs');
 const Multer = multer();
-
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http)
 
 const { AWS_KEY } = require('../config/keys')
 
-console.log({ AWS_KEY });
-
 io.on('connection', function(socket){
-  console.log('a user connected');
+  console.log('user connected');
 
   socket.on('disconnect', function(){
    console.log('user disconnected');
@@ -24,23 +21,17 @@ io.on('connection', function(socket){
 app.use(express.static('public'));
 
 AWS.config.update({
+  signatureVersion: 'v4',
   accessKeyId: AWS_KEY.accessKeyId,
   secretAccessKey: AWS_KEY.secretAccessKey,
   region: AWS_KEY.rengion,
 });
 
 var s3 = new AWS.S3();
-var param = {
-  'Bucket': 'brumari',
-  'Key': 'wedding-main.png',
-  'ACL': 'public-read',
-  'Body': fs.createReadStream('./src/test.jpg'),
-  'ContentType': 'image/jpg'
-}
 
 const getParamsForS3Upload = (name, file, type) => ({
   'Bucket': 'brumari',
-  'Key': name,
+  'Key': name, // FIXME 파일명 중복방지처리해야함.
   'ACL': 'public-read',
   'Body': file,
   'ContentType': type,
@@ -54,9 +45,10 @@ app.post('/upload', Multer.single('upload'), function(req, res){
   // console.log(req.file);
   const { originalname, mimetype, buffer } = req.file
   s3.upload(getParamsForS3Upload(originalname, buffer, mimetype), function(err, data){
-    console.log(err);
-    console.log(data);
-    if (data) return res.json(data);
+    if (data) {
+      io.emit('photo_added', JSON.stringify(data));
+      return res.json(data)
+    };
     res.send(err);
   })
 });
